@@ -51,3 +51,17 @@ Deviations from `plan.md`, and choices the plan left open.
 - **Environment edits are debounced** (300 ms) because variables change on every keystroke. Pending saves are flushed before the window unloads.
 - **The environment editor is a dialog** opened from "Manage environments…" in the switcher, so the main screen stays a single view.
 - **Variable names** may contain letters, digits, `_`, `-` and `.`. Resolution isn't recursive: a value containing `{{x}}` is sent as written.
+
+## M5
+
+- **cURL export uses POSIX shell quoting** (single quotes, with `'` written as `'\''`). It works in macOS and Linux shells, Git Bash, and WSL. Windows `cmd.exe` doesn't understand single quotes. A unit test runs the quoting through a real `/bin/sh` to prove it's safe.
+- **cURL import details:**
+  - No `-L` means redirects are off, matching curl.
+  - `Authorization: Bearer …` becomes bearer auth.
+  - A `Content-Type` the body type would add anyway is dropped.
+  - `-d` data that's valid URL-encoding becomes a form body.
+  - `-F name=@file` becomes a file field with no path. File paths can only come from the file picker, so the user is asked to choose the file again.
+  - Some extra flags are understood because browsers emit them in "Copy as cURL": `-G`, `-I`, `-A`, `-b`, `-e`, `--url`, `--max-time` and `--form-string`. Unknown boolean flags are ignored.
+- **Copy as cURL fills in variables** from the active environment, so the command runs as-is. Any unresolved names are listed in the confirmation.
+- **Multipart text fields export as `--form-string`** so values starting with `@` or `<` aren't read as files by curl.
+- **Vitest config is `vitest.config.mts`** so it loads as ESM without `"type": "module"`.

@@ -17,7 +17,8 @@ export async function launchApp(dataDir: string = tempDataDir()): Promise<Electr
     if (v !== undefined && k !== 'ELECTRON_RUN_AS_NODE') env[k] = v;
   }
   return electron.launch({
-    args: [join(__dirname, '../../out/main/index.js')],
+    // The project root, so Electron reads package.json (name, version, main) like a packaged app.
+    args: [join(__dirname, '../..')],
     env: { ...env, SIMPLEREST_USER_DATA: dataDir },
   });
 }

@@ -183,17 +183,27 @@ export function Dialogs() {
 
 export function Warnings() {
   const warnings = useUi((s) => s.warnings);
+  const notice = useUi((s) => s.notice);
   const dismiss = useUi((s) => s.dismissWarning);
-  if (warnings.length === 0) return null;
+  if (warnings.length === 0 && !notice) return null;
   return (
     <div
       className="pointer-events-none fixed right-3 bottom-3 z-40 flex max-w-md flex-col gap-2"
       data-testid="warnings"
     >
+      {notice && (
+        <div
+          role="status"
+          data-testid="notice"
+          className="pointer-events-auto self-end rounded-md bg-fg px-3 py-2 text-[12.5px] text-bg shadow-lg"
+        >
+          {notice}
+        </div>
+      )}
       {warnings.map((w, i) => (
         <div
           key={i}
-          role="status"
+          role="alert"
           className="pointer-events-auto flex items-start gap-3 rounded-md border border-border bg-bg-subtle p-3 text-[12.5px] shadow-lg"
         >
           <span className="flex-1 text-fg">{w}</span>

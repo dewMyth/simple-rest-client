@@ -5,6 +5,7 @@ import { EnvironmentSwitcher } from './components/layout/EnvironmentSwitcher';
 import './stores/environments';
 import './stores/history';
 import { Sidebar } from './components/sidebar/Sidebar';
+import { importCurlPaste } from './lib/curlActions';
 import { initPersistence, saveLayout } from './lib/persistence';
 import { requestCloseTab, saveTab } from './lib/saving';
 import { useMenuActions } from './lib/shortcuts';
@@ -36,6 +37,7 @@ export default function App() {
         sidebar={<Sidebar />}
         tabBarRight={<EnvironmentSwitcher />}
         onCloseTab={requestCloseTab}
+        onPasteUrl={importCurlPaste}
         onLayoutChanged={saveLayout}
       />
       <Dialogs />

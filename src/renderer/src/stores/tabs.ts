@@ -1,5 +1,12 @@
 import { create } from 'zustand';
-import type { KeyValue, ResponseResult, SavedRequest, SendError, SessionTab } from '@shared/types';
+import type {
+  HttpRequestSpec,
+  KeyValue,
+  ResponseResult,
+  SavedRequest,
+  SendError,
+  SessionTab,
+} from '@shared/types';
 import { stableStringify } from '@shared/stableStringify';
 import { newId } from '../lib/id';
 import { createRequest, toSpec } from '../lib/requests';
@@ -103,6 +110,8 @@ interface TabsState {
   cycle(delta: 1 | -1): void;
   updateRequest(id: string, patch: Partial<SavedRequest>): void;
   setUrl(id: string, url: string): void;
+  /** Replaces the wire-level parts of a request (used by cURL import). */
+  replaceSpec(id: string, spec: HttpRequestSpec): void;
   setParams(id: string, rows: KeyValue[]): void;
   setUi(
     id: string,
@@ -206,6 +215,13 @@ export const useTabs = create<TabsState>((set, get) => {
             disabledParams: params.filter((p) => !p.enabled && (p.key || p.value)),
           },
         };
+      });
+    },
+
+    replaceSpec(id, spec) {
+      patchTab(id, (t) => {
+        const request = { ...t.request, ...spec, disabledParams: [] };
+        return { ...t, request, params: paramRowsFor(request.url, []) };
       });
     },
 

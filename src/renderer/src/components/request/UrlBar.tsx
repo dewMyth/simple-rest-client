@@ -4,7 +4,9 @@ import { methodColor } from '../../lib/methods';
 import { useTabs, type Tab } from '../../stores/tabs';
 import { useKnownVariables } from '../../stores/variables';
 import { CodeEditor } from '../common/CodeEditor';
-import { WarningIcon } from '../common/icons';
+import { MoreIcon, WarningIcon } from '../common/icons';
+import { Menu } from '../common/Menu';
+import { copyAsCurl } from '../../lib/curlActions';
 
 export function UrlBar({ tab, onPasteUrl }: { tab: Tab; onPasteUrl?: (text: string) => boolean }) {
   const { updateRequest, setUrl, send, cancel } = useTabs.getState();
@@ -69,6 +71,12 @@ export function UrlBar({ tab, onPasteUrl }: { tab: Tab; onPasteUrl?: (text: stri
           Send
         </button>
       )}
+      <Menu
+        label="More request actions"
+        testId="request-actions"
+        trigger={<MoreIcon />}
+        items={[{ label: 'Copy as cURL', onSelect: () => copyAsCurl(tab.id) }]}
+      />
     </div>
   );
 }

@@ -96,7 +96,7 @@ test('a corrupt file is preserved with a warning instead of crashing', async () 
 
   const { app, page } = await openApp(dir);
   await expect(page.getByTestId('warnings')).toContainText('broken.json');
-  await expect(page.getByTestId('warnings').getByRole('status')).toHaveCount(2);
+  await expect(page.getByTestId('warnings').getByRole('alert')).toHaveCount(2);
   await expect(page.getByTestId('collections-empty')).toBeVisible();
 
   const kept = readdirSync(join(dir, 'data', 'collections')).find((f) =>

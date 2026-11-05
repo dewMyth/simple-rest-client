@@ -1,4 +1,5 @@
 import { test, expect, type ElectronApplication, type Page } from '@playwright/test';
+import { join } from 'node:path';
 import { launchApp, sendAndWait, setUrl } from './helpers';
 import { startTestServer, type TestServer } from '../fixtures/testServer';
 
@@ -120,4 +121,15 @@ test('tabs: new, switch and dirty indicator', async () => {
   await expect(page.getByTestId('tab').last()).toHaveAttribute('data-dirty', 'true');
   await page.getByTestId('tab').first().click();
   await expect(page.getByTestId('response-view')).toBeVisible();
+});
+
+test('sends the app version in User-Agent', async () => {
+  const { version } = JSON.parse(
+    (await import('node:fs')).readFileSync(join(__dirname, '../../package.json'), 'utf8'),
+  ) as { version: string };
+  await setUrl(page, `${server.url}/echo`);
+  await sendAndWait(page);
+  await expect(page.getByTestId('response-body')).toContainText(
+    `"user-agent": "SimpleRest/${version}"`,
+  );
 });

@@ -84,7 +84,7 @@ export function Button(props: {
     v === 'primary'
       ? 'bg-accent text-accent-fg hover:opacity-90'
       : v === 'danger'
-        ? 'bg-danger text-white hover:opacity-90'
+        ? 'bg-danger text-bg hover:opacity-90'
         : 'border border-border bg-bg hover:bg-bg-hover';
   return (
     <button
