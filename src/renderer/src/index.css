@@ -1,0 +1,91 @@
+@import 'tailwindcss';
+
+/* Theme tokens. Light is the default; dark follows the OS setting. */
+:root {
+  --bg: #ffffff;
+  --bg-subtle: #f6f7f9;
+  --bg-muted: #eceef2;
+  --bg-hover: #e4e7ec;
+  --fg: #1d2026;
+  --fg-muted: #5d6573;
+  --fg-faint: #8a92a0;
+  --border: #dde1e7;
+  --accent: #2563eb;
+  --accent-fg: #ffffff;
+  --success: #15803d;
+  --info: #1d4ed8;
+  --warning: #b45309;
+  --danger: #b91c1c;
+  --var-ok-bg: rgba(37, 99, 235, 0.12);
+  --var-bad-bg: rgba(185, 28, 28, 0.15);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #17181b;
+    --bg-subtle: #1e2024;
+    --bg-muted: #26292e;
+    --bg-hover: #2f3238;
+    --fg: #e6e8eb;
+    --fg-muted: #a3aab5;
+    --fg-faint: #6f7783;
+    --border: #33363c;
+    --accent: #3b82f6;
+    --accent-fg: #ffffff;
+    --success: #4ade80;
+    --info: #60a5fa;
+    --warning: #fbbf24;
+    --danger: #f87171;
+    --var-ok-bg: rgba(96, 165, 250, 0.18);
+    --var-bad-bg: rgba(248, 113, 113, 0.22);
+    color-scheme: dark;
+  }
+}
+
+@theme {
+  --color-bg: var(--bg);
+  --color-bg-subtle: var(--bg-subtle);
+  --color-bg-muted: var(--bg-muted);
+  --color-bg-hover: var(--bg-hover);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-faint: var(--fg-faint);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-success: var(--success);
+  --color-info: var(--info);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  overflow: hidden;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+input,
+textarea,
+.cm-editor {
+  user-select: text;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
