@@ -137,7 +137,9 @@ export function parseCollectionFile(text: string, opts: ImportOptions): ImportRe
     throw new CollectionImportError("The file isn't valid JSON.");
   }
   if (!data || typeof data !== 'object' || Array.isArray(data)) {
-    throw new CollectionImportError("The file doesn't contain a SimpleRest collection.");
+    throw new CollectionImportError(
+      "The file isn't a SimpleRest collection, Postman collection or Postman environment.",
+    );
   }
 
   let rawCollections: unknown[];
@@ -159,12 +161,10 @@ export function parseCollectionFile(text: string, opts: ImportOptions): ImportRe
     includesSecrets = obj['includesSecrets'] === true;
   } else if ('requests' in obj && 'name' in obj) {
     rawCollections = [obj];
-  } else if ('info' in obj && 'item' in obj) {
-    throw new CollectionImportError(
-      'This looks like a Postman collection. Only SimpleRest collection files can be imported.',
-    );
   } else {
-    throw new CollectionImportError("The file doesn't contain a SimpleRest collection.");
+    throw new CollectionImportError(
+      "The file isn't a SimpleRest collection, Postman collection or Postman environment.",
+    );
   }
 
   const schema = looseCollectionSchema();

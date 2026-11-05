@@ -38,7 +38,8 @@ export function CollectionsList() {
         <p className="mt-1">
           Press{' '}
           <kbd className="font-mono">{navigator.userAgent.includes('Mac') ? '⌘S' : 'Ctrl+S'}</kbd>{' '}
-          to save the current request, use + to create one, or import a collection file.
+          to save the current request, use + to create one, or import a SimpleRest or Postman
+          collection.
         </p>
       </div>
     );

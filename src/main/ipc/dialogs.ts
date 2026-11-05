@@ -7,9 +7,10 @@ import {
   buildCollectionFile,
   CollectionImportError,
   MAX_IMPORT_BYTES,
-  parseCollectionFile,
   serializeCollectionFile,
 } from '@shared/collectionFile';
+import { parseImportFile } from '@shared/importFile';
+import { exportPostmanCollection } from '@shared/postman';
 import { IPC, type ImportCollectionsResult, type PickedFile, type SaveResult } from '@shared/ipc';
 import { collectionSchema, idSchema } from '@shared/schemas';
 import type { Collection } from '@shared/types';
@@ -63,24 +64,43 @@ function safeBaseName(name: string): string {
 export function registerDialogIpc(client: HttpClient): void {
   handle(
     IPC.exportCollection,
-    z.object({ collection: collectionSchema, includeSecrets: z.boolean() }),
-    async ({ collection, includeSecrets }, event): Promise<SaveResult> => {
+    z.object({
+      collection: collectionSchema,
+      includeSecrets: z.boolean(),
+      format: z.enum(['simplerest', 'postman']),
+    }),
+    async ({ collection, includeSecrets, format }, event): Promise<SaveResult> => {
       const win = BrowserWindow.fromWebContents(event.sender);
+      const postman = format === 'postman';
       const opts = {
-        title: 'Export collection',
-        defaultPath: `${safeBaseName(collection.name)}.simplerest.json`,
-        filters: [{ name: 'SimpleRest collection', extensions: ['json'] }],
+        title: postman ? 'Export as Postman collection' : 'Export collection',
+        defaultPath: `${safeBaseName(collection.name)}.${postman ? 'postman_collection' : 'simplerest'}.json`,
+        filters: [
+          {
+            name: postman ? 'Postman collection v2.1' : 'SimpleRest collection',
+            extensions: ['json'],
+          },
+        ],
       };
       const result = win
         ? await dialog.showSaveDialog(win, opts)
         : await dialog.showSaveDialog(opts);
       if (result.canceled || !result.filePath) return { saved: false };
-      const file = buildCollectionFile(collection as Collection, {
-        includeSecrets,
-        exportedBy: `SimpleRest/${app.getVersion()}`,
-      });
+      const c = collection as Collection;
+      const text = postman
+        ? JSON.stringify(
+            exportPostmanCollection(c, { includeSecrets, postmanId: randomUUID() }),
+            null,
+            2,
+          ) + '\n'
+        : serializeCollectionFile(
+            buildCollectionFile(c, {
+              includeSecrets,
+              exportedBy: `SimpleRest/${app.getVersion()}`,
+            }),
+          );
       try {
-        await writeFile(result.filePath, serializeCollectionFile(file), 'utf8');
+        await writeFile(result.filePath, text, 'utf8');
         return { saved: true, path: result.filePath };
       } catch (err) {
         return { saved: false, error: `Couldn't write the file: ${(err as Error).message}` };
@@ -90,40 +110,46 @@ export function registerDialogIpc(client: HttpClient): void {
 
   handle(
     IPC.importCollections,
-    z.array(z.string()).max(10_000),
-    async (existingNames, event): Promise<ImportCollectionsResult> => {
+    z.object({
+      collectionNames: z.array(z.string()).max(10_000),
+      environmentNames: z.array(z.string()).max(10_000),
+    }),
+    async (existing, event): Promise<ImportCollectionsResult> => {
       const win = BrowserWindow.fromWebContents(event.sender);
       const opts = {
-        title: 'Import collections',
+        title: 'Import collections and environments',
         properties: ['openFile' as const, 'multiSelections' as const],
-        filters: [{ name: 'SimpleRest collection', extensions: ['json'] }],
+        filters: [{ name: 'SimpleRest or Postman JSON', extensions: ['json'] }],
       };
       const result = win
         ? await dialog.showOpenDialog(win, opts)
         : await dialog.showOpenDialog(opts);
-      const empty = { collections: [], includesSecrets: false, errors: [] };
-      if (result.canceled || result.filePaths.length === 0) return { canceled: true, ...empty };
-
       const out: ImportCollectionsResult = {
         canceled: false,
-        ...empty,
         collections: [],
+        environments: [],
+        includesSecrets: false,
+        notes: [],
         errors: [],
       };
-      const names = [...existingNames];
+      if (result.canceled || result.filePaths.length === 0) return { ...out, canceled: true };
+
+      const names = {
+        newId: randomUUID,
+        collectionNames: [...existing.collectionNames],
+        environmentNames: [...existing.environmentNames],
+      };
       for (const path of result.filePaths) {
         const label = basename(path);
         try {
           if ((await stat(path)).size > MAX_IMPORT_BYTES) {
             throw new CollectionImportError('The file is larger than 50 MB.');
           }
-          const parsed = parseCollectionFile(await readFile(path, 'utf8'), {
-            newId: randomUUID,
-            existingNames: names,
-          });
+          const parsed = parseImportFile(await readFile(path, 'utf8'), names);
           out.collections.push(...parsed.collections);
+          out.environments.push(...parsed.environments);
           out.includesSecrets ||= parsed.includesSecrets;
-          names.push(...parsed.collections.map((c) => c.name));
+          out.notes.push(...parsed.notes.map((n) => `${label}: ${n}`));
         } catch (err) {
           const msg = err instanceof CollectionImportError ? err.message : (err as Error).message;
           out.errors.push(`${label}: ${msg}`);

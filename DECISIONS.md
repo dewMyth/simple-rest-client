@@ -88,3 +88,18 @@ Added at the user's request. This extends the plan's scope: section 2 had no imp
 - **Import always adds new collections with fresh IDs.** Name clashes become `Name (2)`. Nothing existing is overwritten.
 - **Multipart file paths are never exported**, and they're cleared on import. They're machine-specific, and file paths may only come from the file picker.
 - **Parsing and file access happen in the main process.** Files over 50 MB are refused. A bad file produces a warning naming it, while the other selected files still import.
+
+## Postman compatibility (after v0.1.0)
+
+Added at the user's request. This removes "Postman import" from the plan's out-of-scope list. The choices were confirmed with the user:
+
+- **Import and export.** Import reads Postman Collection v2.0 and v2.1 files and Postman environment exports. Export writes Postman Collection v2.1, picked in the same Export dialog as the SimpleRest format.
+- **Folders are flattened** into one collection, keeping Postman's order. The folder path is prefixed to request names (`Users / Admin / Delete user`).
+- **Variables:** a collection's variables become an environment named `<Collection> variables`. Postman environment files import as environments. Path variables (`:id`) become `{{id}}`, and their values are added to that environment.
+- **Lossy mappings are reported, not silent.** Unsupported auth types (OAuth, Digest, AWS, …), scripts, binary file bodies, file fields and unsupported methods produce one warning per file. Inherited auth is copied onto each request, because SimpleRest has no folder- or collection-level auth.
+- **Postman export:**
+  - Timeouts are dropped, since Postman has no per-request timeout.
+  - "Follow redirects" off and "Verify TLS" off are written as `protocolProfileBehavior`.
+  - Disabled query params are written as disabled entries in `url.query`.
+  - Secrets and file paths follow the same rules as SimpleRest export.
+- **One import entry point** (`src/shared/importFile.ts`) detects the file type, so users never choose a format when importing.

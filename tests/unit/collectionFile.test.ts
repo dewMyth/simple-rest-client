@@ -144,14 +144,14 @@ describe('import', () => {
 
   it.each([
     ['not json', '{', 'valid JSON'],
-    ['array', '[]', "doesn't contain"],
+    ['array', '[]', "isn't a SimpleRest collection"],
     ['other format', '{"format":"other","collections":[]}', 'Unsupported file format'],
     [
       'newer version',
       '{"format":"simplerest-collection","formatVersion":99,"collections":[{}]}',
       'newer version',
     ],
-    ['postman', '{"info":{},"item":[]}', 'Postman'],
+    ['unknown object', '{"hello":1}', "isn't a SimpleRest collection"],
     [
       'bad method',
       JSON.stringify({ name: 'x', requests: [{ ...collection.requests[0], method: 'FETCH' }] }),

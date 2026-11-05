@@ -41,9 +41,15 @@ export interface PickedFile {
   name: string;
 }
 
+export type ExportFormat = 'simplerest' | 'postman';
+
 export interface ImportCollectionsResult {
   canceled: boolean;
   collections: import('./types').Collection[];
+  /** Environments from Postman collection variables or Postman environment files. */
+  environments: import('./types').Environment[];
+  /** Non-fatal notes per file, e.g. "shop.json: Pre-request and test scripts were skipped". */
+  notes: string[];
   /** True when at least one imported file says it contains secrets. */
   includesSecrets: boolean;
   /** One message per file that couldn't be imported. */

@@ -209,7 +209,7 @@ export function Warnings() {
           role="alert"
           className="pointer-events-auto flex items-start gap-3 rounded-md border border-border bg-bg-subtle p-3 text-[12.5px] shadow-lg"
         >
-          <span className="flex-1 text-fg">{w}</span>
+          <span className="flex-1 whitespace-pre-line text-fg">{w}</span>
           <button
             onClick={() => dismiss(i)}
             className="text-fg-muted hover:text-fg"

@@ -38,7 +38,7 @@ export function Sidebar() {
         {view === 'collections' && (
           <button
             aria-label="Import collection"
-            title="Import collection from a JSON file"
+            title="Import SimpleRest or Postman collections and Postman environments"
             data-testid="import-collection"
             onClick={() => void importCollections()}
             className="ml-auto rounded p-1.5 text-fg-muted hover:bg-bg-hover hover:text-fg"
