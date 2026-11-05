@@ -43,3 +43,11 @@ Deviations from `plan.md`, and choices the plan left open.
 - **Dirty checks use a stable (sorted-key) serialization** so key order never causes a false "unsaved" dot. The snapshot is stored in `session.json` so the indicator survives a restart.
 - **`settings.json` has a `theme` field** (`system` by default, which follows the OS). There's no UI for it; v1 always follows the OS unless the file is edited.
 - **Window bounds are saved** (debounced) and restored only if they still fit on a connected display.
+
+## M4
+
+- **Secrets are stripped in the main process**, not the renderer, so nothing the renderer sends can put auth values into `history.json`. Header names are kept and only their values are cleared.
+- **What goes into history:** every request that reached the network, including ones that failed with DNS, TLS, timeout, and similar errors. Sends blocked before going out (unresolved variables, invalid URL, unapproved file) and cancelled sends are not recorded. History stores the request as written, with `{{variables}}` unresolved.
+- **Environment edits are debounced** (300 ms) because variables change on every keystroke. Pending saves are flushed before the window unloads.
+- **The environment editor is a dialog** opened from "Manage environments…" in the switcher, so the main screen stays a single view.
+- **Variable names** may contain letters, digits, `_`, `-` and `.`. Resolution isn't recursive: a value containing `{{x}}` is sent as written.

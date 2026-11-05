@@ -1,5 +1,7 @@
 import type { Session } from '@shared/types';
 import { useCollections } from '../stores/collections';
+import { flushEnvironmentSaves, useEnvironments } from '../stores/environments';
+import { useHistory } from '../stores/history';
 import { useSettings } from '../stores/settings';
 import { fromSessionTab, toSessionTab, useTabs } from '../stores/tabs';
 import { useUi } from '../stores/ui';
@@ -34,6 +36,8 @@ export function saveLayout(): void {
 export async function initPersistence(loaders: Loaders = {}): Promise<void> {
   const data = await window.api.loadAll();
   useCollections.getState().load(data.collections);
+  useEnvironments.getState().load(data.environments, data.settings.activeEnvironmentId);
+  useHistory.getState().load(data.history);
   useSettings.getState().load(data.settings.layout);
   useSettings.getState().setDefaultOptions(data.settings.defaultOptions);
   if (data.session && data.session.tabs.length > 0) {
@@ -66,6 +70,7 @@ export async function initPersistence(loaders: Loaders = {}): Promise<void> {
     if (changed) scheduleSessionSave();
   });
   window.addEventListener('beforeunload', () => {
+    flushEnvironmentSaves();
     if (sessionTimer) {
       clearTimeout(sessionTimer);
       void window.api.saveSession(buildSession());

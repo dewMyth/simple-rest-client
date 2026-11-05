@@ -1,6 +1,9 @@
 import { useEffect } from 'react';
 import { AppLayout } from './components/layout/AppLayout';
 import { Dialogs, Warnings } from './components/layout/Dialogs';
+import { EnvironmentSwitcher } from './components/layout/EnvironmentSwitcher';
+import './stores/environments';
+import './stores/history';
 import { Sidebar } from './components/sidebar/Sidebar';
 import { initPersistence, saveLayout } from './lib/persistence';
 import { requestCloseTab, saveTab } from './lib/saving';
@@ -29,7 +32,12 @@ export default function App() {
   if (!ready) return <div className="h-full bg-bg" />;
   return (
     <>
-      <AppLayout sidebar={<Sidebar />} onCloseTab={requestCloseTab} onLayoutChanged={saveLayout} />
+      <AppLayout
+        sidebar={<Sidebar />}
+        tabBarRight={<EnvironmentSwitcher />}
+        onCloseTab={requestCloseTab}
+        onLayoutChanged={saveLayout}
+      />
       <Dialogs />
       <Warnings />
     </>

@@ -5,6 +5,7 @@ import { useCollections } from '../../stores/collections';
 import { useTabs } from '../../stores/tabs';
 import { useUi, type Dialog } from '../../stores/ui';
 import { Button, Modal } from '../common/Modal';
+import { EnvironmentsDialog } from './EnvironmentsDialog';
 
 const NEW = '__new__';
 const fieldClass =
@@ -175,6 +176,8 @@ export function Dialogs() {
       return <CloseTabDialog dialog={dialog} />;
     case 'confirm':
       return <ConfirmDialog dialog={dialog} />;
+    case 'environments':
+      return <EnvironmentsDialog initialId={dialog.selectedId} />;
   }
 }
 

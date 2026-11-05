@@ -3,6 +3,7 @@ import { create } from 'zustand';
 export type Dialog =
   | { kind: 'save'; tabId: string; thenClose: boolean }
   | { kind: 'closeTab'; tabId: string }
+  | { kind: 'environments'; selectedId: string | null }
   | {
       kind: 'confirm';
       title: string;

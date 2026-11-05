@@ -1,6 +1,9 @@
-const EMPTY = new Set<string>();
+import { useMemo } from 'react';
+import { variablesToMap } from '@shared/variables';
+import { useEnvironments } from './environments';
 
-/** Names defined in the active environment. Replaced by the environments store in M4. */
+/** Names defined (and enabled) in the active environment. */
 export function useKnownVariables(): Set<string> {
-  return EMPTY;
+  const env = useEnvironments((s) => s.environments.find((e) => e.id === s.activeId));
+  return useMemo(() => new Set(Object.keys(env ? variablesToMap(env.variables) : {})), [env]);
 }
