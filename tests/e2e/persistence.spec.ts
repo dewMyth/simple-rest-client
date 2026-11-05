@@ -114,3 +114,21 @@ test('deleting the data folder resets the app', async () => {
   await expect(page.getByTestId('warnings')).toHaveCount(0);
   await app.close();
 });
+
+test('collection menus are reachable from the keyboard', async () => {
+  const { app, page } = await openApp(tempDataDir());
+  await page.getByTestId('new-collection').click();
+  await page.getByTestId('inline-rename').fill('Keyboard');
+  await page.keyboard.press('Enter');
+  // Park the mouse away from the sidebar so nothing is hovered.
+  await page.mouse.move(900, 500);
+  await page.getByTestId('collection-menu').focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('menuitem', { name: 'Add request' })).toBeFocused();
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('ArrowDown');
+  await expect(page.getByRole('menuitem', { name: 'Duplicate' })).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(page.getByTestId('collection-name')).toHaveText(['Keyboard', 'Keyboard copy']);
+  await app.close();
+});

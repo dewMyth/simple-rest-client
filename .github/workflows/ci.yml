@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Existing release tag to build installers for (e.g. 0.1.0). Leave empty to only run tests.'
+        description: 'Tag of an EXISTING release whose installers are missing (e.g. 0.1.0). Leave empty to only run tests.'
         required: false
         default: ''
 
@@ -26,11 +26,20 @@ jobs:
         os: [macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Check the tag exists
+        if: inputs.tag != ''
+        shell: bash
+        run: |
+          if ! git ls-remote --exit-code --tags "https://github.com/${{ github.repository }}" "refs/tags/${{ inputs.tag }}" > /dev/null; then
+            echo "::error::Tag '${{ inputs.tag }}' doesn't exist yet. Create the release (and its tag) on GitHub first. Publishing it builds and attaches the installers automatically, so this manual run is only needed for releases whose build failed."
+            exit 1
+          fi
+
+      - uses: actions/checkout@v5
         with:
           ref: ${{ inputs.tag || github.ref }}
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 24
           cache: npm
@@ -43,6 +52,16 @@ jobs:
       - name: End-to-end tests
         run: npx playwright test
 
+      - name: Upload end-to-end report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ matrix.os }}
+          path: |
+            playwright-report
+            test-results
+          retention-days: 14
+
   installers:
     name: installers (${{ matrix.os }})
     needs: test
@@ -53,11 +72,11 @@ jobs:
         os: [macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ inputs.tag || github.ref }}
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 24
           cache: npm

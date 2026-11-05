@@ -44,7 +44,7 @@ export function TabBar({ onClose, right }: { onClose: (id: string) => void; righ
               <span className="relative ml-auto flex h-4 w-4 shrink-0 items-center justify-center">
                 {dirty && (
                   <span
-                    className="absolute h-2 w-2 rounded-full bg-fg-muted group-hover:hidden"
+                    className="absolute h-2 w-2 rounded-full bg-fg-muted group-focus-within:hidden group-hover:hidden"
                     aria-label="Unsaved changes"
                     data-testid="dirty-indicator"
                   />
@@ -55,7 +55,7 @@ export function TabBar({ onClose, right }: { onClose: (id: string) => void; righ
                     e.stopPropagation();
                     onClose(t.id);
                   }}
-                  className={`absolute rounded p-0.5 hover:bg-bg-hover ${dirty ? 'hidden group-hover:block' : active ? '' : 'opacity-0 group-hover:opacity-100'}`}
+                  className={`absolute rounded p-0.5 hover:bg-bg-hover ${dirty || !active ? 'opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 focus-visible:opacity-100' : ''}`}
                 >
                   <XIcon width={12} height={12} />
                 </button>
