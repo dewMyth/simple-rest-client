@@ -2,6 +2,9 @@ import { app, BrowserWindow, ipcMain, Menu, nativeTheme, session } from 'electro
 import { join } from 'node:path';
 import { IPC, type AppInfo } from '@shared/ipc';
 import { buildMenu } from './menu';
+import { HttpClient } from './http/client';
+import { registerHttpIpc } from './ipc/http';
+import { registerDialogIpc } from './ipc/dialogs';
 import { assertTrustedSender, hardenWebContents, isDev, rendererIndexPath } from './security';
 
 app.setName('SimpleRest');
@@ -37,7 +40,12 @@ function createWindow(): BrowserWindow {
   return win;
 }
 
+let httpClient: HttpClient | null = null;
+
 function registerIpc(): void {
+  httpClient = new HttpClient({ userAgent: `SimpleRest/${app.getVersion()}` });
+  registerHttpIpc(httpClient);
+  registerDialogIpc(httpClient);
   ipcMain.handle(IPC.appInfo, (event): AppInfo => {
     assertTrustedSender(event);
     return { name: app.getName(), version: app.getVersion(), platform: process.platform };
@@ -59,6 +67,10 @@ void app.whenReady().then(() => {
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
+});
+
+app.on('will-quit', () => {
+  void httpClient?.close();
 });
 
 app.on('window-all-closed', () => {
