@@ -143,3 +143,5 @@ jobs:
             dist/*.dmg
             dist/*.exe
           fail_on_unmatched_files: true
+          # Only used when this job creates the release; an existing release keeps its notes.
+          generate_release_notes: true

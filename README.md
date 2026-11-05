@@ -11,7 +11,8 @@ A fast, local-first REST client for macOS and Windows. There's no account, no sy
 - Responses with status, time, size and headers, plus Pretty and Raw views. Pretty view keeps big integers exact.
 - Search, copy, and save a response to a file
 - Tabs with an unsaved-changes dot
-- Collections, one level deep
+- Collections, one level deep, with import and export as SimpleRest or Postman JSON
+- Import Postman collections (v2.0 and v2.1) and Postman environments
 - Environments with `{{variables}}`, highlighted in the editor
 - History of the last 200 requests
 - Paste a cURL command into the URL bar to import it, or copy any request as cURL
@@ -54,6 +55,42 @@ data/
 ```
 
 Files are written atomically, so a crash can't leave one half-written. If a file can't be read, SimpleRest renames it to `<name>.corrupt-<timestamp>.json`, shows a warning, and carries on. It never deletes it. To reset the app, quit it and delete the `data` folder.
+
+### Sharing collections
+
+To share a collection, use **Export…** from its ⋯ menu and pick a format:
+
+- **SimpleRest** writes a `.simplerest.json` file. It's an exact copy.
+- **Postman Collection v2.1** writes a `.postman_collection.json` file for Postman and other tools that read Postman files. Request timeouts aren't included, because Postman has no equivalent.
+
+Both formats leave secrets out unless you tick **Include secrets**. Secrets are Bearer tokens, Basic passwords, and the values of `Authorization`, `Cookie`, `Proxy-Authorization` and `X-Api-Key` headers. Multipart file paths are never exported.
+
+To import, use the import button at the top of the Collections sidebar, or **File → Import Collections or Environments…**. You can select several files at once. Supported files:
+
+- SimpleRest collection files, including ones copied from the data folder
+- Postman collections, v2.0 and v2.1
+- Postman environment exports (`.postman_environment.json`)
+
+Imports are always added as new collections and environments. A taken name becomes `Shop API (2)`, so nothing existing is overwritten.
+
+#### How Postman collections are converted
+
+| Postman                                            | SimpleRest                                                                                                    |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Nested folders                                     | Flattened into one collection. The folder path is prefixed to the request name: `Users / Admin / Delete user` |
+| Collection variables                               | A new environment named `<Collection> variables`                                                              |
+| Path variables (`/users/:id`)                      | `{{id}}`, with the value added to that environment                                                            |
+| Auth inherited from folders or the collection      | Copied onto each request                                                                                      |
+| Bearer, Basic                                      | Bearer, Basic                                                                                                 |
+| API key                                            | A header or query parameter                                                                                   |
+| OAuth 1/2, Digest, AWS and other auth              | Left empty, with a warning                                                                                    |
+| Raw, URL-encoded and form-data bodies              | JSON or text, form, and multipart bodies                                                                      |
+| GraphQL bodies                                     | JSON bodies (`{ "query", "variables" }`)                                                                      |
+| Binary file bodies, file fields                    | Left without files. Pick them again                                                                           |
+| Pre-request and test scripts                       | Skipped, with a warning                                                                                       |
+| "Follow redirects" and "SSL verification" settings | The request's options                                                                                         |
+
+Anything that couldn't be carried over is listed in a warning after the import.
 
 ### Secrets are stored in plain text
 

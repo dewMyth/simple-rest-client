@@ -8,6 +8,7 @@ import { useUi } from '../../stores/ui';
 import { ChevronIcon, MoreIcon } from '../common/icons';
 import { Menu } from '../common/Menu';
 import { InlineRename } from './InlineRename';
+import { exportCollection } from '../../lib/collectionTransfer';
 
 const REQ_MIME = 'application/x-simplerest-request';
 const COL_MIME = 'application/x-simplerest-collection';
@@ -37,7 +38,8 @@ export function CollectionsList() {
         <p className="mt-1">
           Press{' '}
           <kbd className="font-mono">{navigator.userAgent.includes('Mac') ? '⌘S' : 'Ctrl+S'}</kbd>{' '}
-          to save the current request, or use + to create one.
+          to save the current request, use + to create one, or import a SimpleRest or Postman
+          collection.
         </p>
       </div>
     );
@@ -143,6 +145,7 @@ function CollectionItem({
               { label: 'Add request', onSelect: addRequest },
               { label: 'Rename', onSelect: () => setRenaming({ collectionId: c.id }) },
               { label: 'Duplicate', onSelect: () => cols.duplicate(c.id) },
+              { label: 'Export…', onSelect: () => exportCollection(c.id) },
               {
                 label: 'Delete',
                 danger: true,

@@ -10,6 +10,8 @@ interface EnvironmentsState {
   load(environments: Environment[], activeId: string | null): void;
   setActive(id: string | null): void;
   create(name: string): Environment;
+  /** Adds imported environments (already given fresh ids and unique names). */
+  importMany(environments: Environment[]): void;
   rename(id: string, name: string): void;
   setVariables(id: string, variables: KeyValue[]): void;
   duplicate(id: string): Environment | undefined;
@@ -77,6 +79,14 @@ export const useEnvironments = create<EnvironmentsState>((set, get) => {
       persist(env, true);
       persistOrder(environments);
       return env;
+    },
+
+    importMany(imported) {
+      if (imported.length === 0) return;
+      const environments = [...get().environments, ...imported];
+      set({ environments });
+      imported.forEach((e) => persist(e, true));
+      persistOrder(environments);
     },
 
     rename(id, name) {

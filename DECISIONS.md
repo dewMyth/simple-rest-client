@@ -77,3 +77,29 @@ Deviations from `plan.md`, and choices the plan left open.
   - `app.asar` is 5.5 MB and holds only `out/`, `undici` and `zod`, with no source maps or tests.
   - Startup to a usable window is about 0.3 s warm, and 1.9 s on the first launch of a freshly built app (which includes macOS's first-run scan).
 - **E2E tests launch the project root**, not `out/main/index.js`, so Electron reads `package.json` the same way a packaged app does. This gives the correct app version in `User-Agent`.
+
+## Collection import and export (after v0.1.0)
+
+Added at the user's request. This extends the plan's scope: section 2 had no import/export, and section 2's out-of-scope list named Postman and Insomnia import. The choices were confirmed with the user:
+
+- **SimpleRest JSON format only.** The file wraps collections with a marker: `{ "format": "simplerest-collection", "formatVersion": 1, "includesSecrets": …, "collections": [...] }`. Import also accepts a bare collection object, such as a file copied from the data folder. Postman files get a clear "not supported" message.
+- **One collection per export file.** Import accepts one or more files, and each file may hold several collections.
+- **Secrets are off by default** and included only when "Include secrets" is ticked in the export dialog. Stripping uses the same rules as history, moved to `src/shared/secrets.ts`.
+- **Import always adds new collections with fresh IDs.** Name clashes become `Name (2)`. Nothing existing is overwritten.
+- **Multipart file paths are never exported**, and they're cleared on import. They're machine-specific, and file paths may only come from the file picker.
+- **Parsing and file access happen in the main process.** Files over 50 MB are refused. A bad file produces a warning naming it, while the other selected files still import.
+
+## Postman compatibility (after v0.1.0)
+
+Added at the user's request. This removes "Postman import" from the plan's out-of-scope list. The choices were confirmed with the user:
+
+- **Import and export.** Import reads Postman Collection v2.0 and v2.1 files and Postman environment exports. Export writes Postman Collection v2.1, picked in the same Export dialog as the SimpleRest format.
+- **Folders are flattened** into one collection, keeping Postman's order. The folder path is prefixed to request names (`Users / Admin / Delete user`).
+- **Variables:** a collection's variables become an environment named `<Collection> variables`. Postman environment files import as environments. Path variables (`:id`) become `{{id}}`, and their values are added to that environment.
+- **Lossy mappings are reported, not silent.** Unsupported auth types (OAuth, Digest, AWS, …), scripts, binary file bodies, file fields and unsupported methods produce one warning per file. Inherited auth is copied onto each request, because SimpleRest has no folder- or collection-level auth.
+- **Postman export:**
+  - Timeouts are dropped, since Postman has no per-request timeout.
+  - "Follow redirects" off and "Verify TLS" off are written as `protocolProfileBehavior`.
+  - Disabled query params are written as disabled entries in `url.query`.
+  - Secrets and file paths follow the same rules as SimpleRest export.
+- **One import entry point** (`src/shared/importFile.ts`) detects the file type, so users never choose a format when importing.

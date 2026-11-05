@@ -6,6 +6,7 @@ import { useTabs } from '../../stores/tabs';
 import { useUi, type Dialog } from '../../stores/ui';
 import { Button, Modal } from '../common/Modal';
 import { EnvironmentsDialog } from './EnvironmentsDialog';
+import { ExportCollectionDialog } from './ExportCollectionDialog';
 
 const NEW = '__new__';
 const fieldClass =
@@ -178,6 +179,8 @@ export function Dialogs() {
       return <ConfirmDialog dialog={dialog} />;
     case 'environments':
       return <EnvironmentsDialog initialId={dialog.selectedId} />;
+    case 'exportCollection':
+      return <ExportCollectionDialog collectionId={dialog.collectionId} />;
   }
 }
 
@@ -206,7 +209,7 @@ export function Warnings() {
           role="alert"
           className="pointer-events-auto flex items-start gap-3 rounded-md border border-border bg-bg-subtle p-3 text-[12.5px] shadow-lg"
         >
-          <span className="flex-1 text-fg">{w}</span>
+          <span className="flex-1 whitespace-pre-line text-fg">{w}</span>
           <button
             onClick={() => dismiss(i)}
             className="text-fg-muted hover:text-fg"

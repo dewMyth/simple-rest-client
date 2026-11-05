@@ -1,4 +1,11 @@
-import type { AppInfo, MenuAction, PickedFile, SaveResult } from './ipc';
+import type {
+  AppInfo,
+  ExportFormat,
+  ImportCollectionsResult,
+  MenuAction,
+  PickedFile,
+  SaveResult,
+} from './ipc';
 import type {
   Collection,
   Environment,
@@ -27,6 +34,20 @@ export interface SimpleRestApi {
   /** Saves the full response body for a tab through a native save dialog. */
   saveResponse(tabId: string): Promise<SaveResult>;
   copyText(text: string): Promise<void>;
+  /** Writes a collection (SimpleRest or Postman v2.1 JSON) to a file chosen in a save dialog. */
+  exportCollection(
+    collection: Collection,
+    includeSecrets: boolean,
+    format: ExportFormat,
+  ): Promise<SaveResult>;
+  /**
+   * Reads SimpleRest collections, Postman collections and Postman environments chosen in an open
+   * dialog. Everything returned has fresh ids and names that don't clash with the ones given.
+   */
+  importCollections(existing: {
+    collectionNames: string[];
+    environmentNames: string[];
+  }): Promise<ImportCollectionsResult>;
 
   /** Loads everything from the data folder. Corrupt files are set aside and listed in `warnings`. */
   loadAll(): Promise<LoadedData>;

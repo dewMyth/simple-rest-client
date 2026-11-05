@@ -15,6 +15,8 @@ function requestItems(): MenuItemConstructorOptions[] {
     { label: 'Save Request', accelerator: 'CommandOrControl+S', click: send('save') },
     { label: 'Close Tab', accelerator: 'CommandOrControl+W', click: send('closeTab') },
     { type: 'separator' },
+    { label: 'Import Collections or Environments…', click: send('importCollection') },
+    { type: 'separator' },
     { label: 'Send Request', accelerator: 'CommandOrControl+Enter', click: send('send') },
     { label: 'Focus URL', accelerator: 'CommandOrControl+L', click: send('focusUrl') },
   ];

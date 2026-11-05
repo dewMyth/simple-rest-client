@@ -1,0 +1,180 @@
+{
+  "info": {
+    "_postman_id": "8f1c1a2e-1111-4a5b-9c3d-000000000001",
+    "name": "Shop API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+  },
+  "variable": [
+    { "key": "base", "value": "https://shop.test/api" },
+    { "key": "token", "value": "abc123" },
+    { "key": "old", "value": "x", "disabled": true }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": "https://shop.test/health"
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "List products",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('ok')"] } }],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "X-Debug", "value": "1", "disabled": true }
+            ],
+            "url": {
+              "raw": "{{base}}/products?page=1&q=shoes",
+              "host": ["{{base}}"],
+              "path": ["products"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "q", "value": "shoes" },
+                { "key": "sort", "value": "price", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get product",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base}}/products/:productId",
+              "host": ["{{base}}"],
+              "path": ["products", ":productId"],
+              "variable": [{ "key": "productId", "value": "42" }]
+            }
+          }
+        },
+        {
+          "name": "Admin",
+          "auth": {
+            "type": "basic",
+            "basic": [
+              { "key": "username", "value": "admin" },
+              { "key": "password", "value": "s3cret" }
+            ]
+          },
+          "item": [
+            {
+              "name": "Create product",
+              "protocolProfileBehavior": { "followRedirects": false, "strictSSL": false },
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Shoe\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": "{{base}}/products"
+              }
+            },
+            {
+              "name": "Import XML",
+              "request": {
+                "method": "PUT",
+                "body": {
+                  "mode": "raw",
+                  "raw": "<products/>",
+                  "options": { "raw": { "language": "xml" } }
+                },
+                "url": "{{base}}/products/import"
+              }
+            },
+            {
+              "name": "Public delete",
+              "request": {
+                "method": "DELETE",
+                "auth": { "type": "noauth" },
+                "url": "{{base}}/products/1"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Account",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                { "key": "key", "value": "X-Shop-Key" },
+                { "key": "value", "value": "k-999" },
+                { "key": "in", "value": "header" }
+              ]
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "user", "value": "ada" },
+                { "key": "remember", "value": "1", "disabled": true }
+              ]
+            },
+            "url": "{{base}}/login"
+          }
+        },
+        {
+          "name": "Avatar",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                { "key": "key", "value": "api_key" },
+                { "key": "value", "value": "q-1" },
+                { "key": "in", "value": "query" }
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "caption", "value": "me", "type": "text" },
+                { "key": "file", "type": "file", "src": "/Users/someone/me.png" }
+              ]
+            },
+            "url": "{{base}}/avatar"
+          }
+        },
+        {
+          "name": "Search (GraphQL)",
+          "request": {
+            "method": "POST",
+            "auth": { "type": "oauth2", "oauth2": [{ "key": "accessToken", "value": "zzz" }] },
+            "body": {
+              "mode": "graphql",
+              "graphql": { "query": "{ me { id } }", "variables": "{\"a\":1}" }
+            },
+            "url": {
+              "protocol": "https",
+              "host": ["shop", "test"],
+              "port": "8443",
+              "path": ["graphql"]
+            }
+          }
+        },
+        {
+          "name": "Upload binary",
+          "request": {
+            "method": "PURGE",
+            "body": { "mode": "file", "file": { "src": "/tmp/x.bin" } },
+            "url": "{{base}}/bin"
+          }
+        }
+      ]
+    }
+  ]
+}
