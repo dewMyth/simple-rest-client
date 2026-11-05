@@ -4,6 +4,7 @@ export type Dialog =
   | { kind: 'save'; tabId: string; thenClose: boolean }
   | { kind: 'closeTab'; tabId: string }
   | { kind: 'environments'; selectedId: string | null }
+  | { kind: 'exportCollection'; collectionId: string }
   | {
       kind: 'confirm';
       title: string;

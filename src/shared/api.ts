@@ -1,4 +1,4 @@
-import type { AppInfo, MenuAction, PickedFile, SaveResult } from './ipc';
+import type { AppInfo, ImportCollectionsResult, MenuAction, PickedFile, SaveResult } from './ipc';
 import type {
   Collection,
   Environment,
@@ -27,6 +27,10 @@ export interface SimpleRestApi {
   /** Saves the full response body for a tab through a native save dialog. */
   saveResponse(tabId: string): Promise<SaveResult>;
   copyText(text: string): Promise<void>;
+  /** Writes a collection to a JSON file chosen in a native save dialog. */
+  exportCollection(collection: Collection, includeSecrets: boolean): Promise<SaveResult>;
+  /** Reads collection files chosen in a native open dialog. Returned collections have fresh ids. */
+  importCollections(existingNames: string[]): Promise<ImportCollectionsResult>;
 
   /** Loads everything from the data folder. Corrupt files are set aside and listed in `warnings`. */
   loadAll(): Promise<LoadedData>;

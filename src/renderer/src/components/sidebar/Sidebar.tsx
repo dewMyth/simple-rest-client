@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useCollections } from '../../stores/collections';
 import { useUi } from '../../stores/ui';
-import { PlusIcon } from '../common/icons';
+import { ImportIcon, PlusIcon } from '../common/icons';
+import { importCollections } from '../../lib/collectionTransfer';
 import { CollectionsList } from './CollectionsList';
 import { HistoryList } from './HistoryList';
 
@@ -36,10 +37,22 @@ export function Sidebar() {
         ))}
         {view === 'collections' && (
           <button
+            aria-label="Import collection"
+            title="Import collection from a JSON file"
+            data-testid="import-collection"
+            onClick={() => void importCollections()}
+            className="ml-auto rounded p-1.5 text-fg-muted hover:bg-bg-hover hover:text-fg"
+          >
+            <ImportIcon />
+          </button>
+        )}
+        {view === 'collections' && (
+          <button
             aria-label="New collection"
             data-testid="new-collection"
+            title="New collection"
             onClick={newCollection}
-            className="ml-auto rounded p-1.5 text-fg-muted hover:bg-bg-hover hover:text-fg"
+            className="rounded p-1.5 text-fg-muted hover:bg-bg-hover hover:text-fg"
           >
             <PlusIcon />
           </button>

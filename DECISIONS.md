@@ -77,3 +77,14 @@ Deviations from `plan.md`, and choices the plan left open.
   - `app.asar` is 5.5 MB and holds only `out/`, `undici` and `zod`, with no source maps or tests.
   - Startup to a usable window is about 0.3 s warm, and 1.9 s on the first launch of a freshly built app (which includes macOS's first-run scan).
 - **E2E tests launch the project root**, not `out/main/index.js`, so Electron reads `package.json` the same way a packaged app does. This gives the correct app version in `User-Agent`.
+
+## Collection import and export (after v0.1.0)
+
+Added at the user's request. This extends the plan's scope: section 2 had no import/export, and section 2's out-of-scope list named Postman and Insomnia import. The choices were confirmed with the user:
+
+- **SimpleRest JSON format only.** The file wraps collections with a marker: `{ "format": "simplerest-collection", "formatVersion": 1, "includesSecrets": …, "collections": [...] }`. Import also accepts a bare collection object, such as a file copied from the data folder. Postman files get a clear "not supported" message.
+- **One collection per export file.** Import accepts one or more files, and each file may hold several collections.
+- **Secrets are off by default** and included only when "Include secrets" is ticked in the export dialog. Stripping uses the same rules as history, moved to `src/shared/secrets.ts`.
+- **Import always adds new collections with fresh IDs.** Name clashes become `Name (2)`. Nothing existing is overwritten.
+- **Multipart file paths are never exported**, and they're cleared on import. They're machine-specific, and file paths may only come from the file picker.
+- **Parsing and file access happen in the main process.** Files over 50 MB are refused. A bad file produces a warning naming it, while the other selected files still import.

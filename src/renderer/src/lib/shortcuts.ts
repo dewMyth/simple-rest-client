@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useRef } from 'react';
 import type { MenuAction } from '@shared/ipc';
 import { useTabs } from '../stores/tabs';
 import { editors } from './editors';
+import { importCollections } from './collectionTransfer';
 
 export interface ShortcutHandlers {
   save: () => void;
@@ -57,6 +58,9 @@ export function useMenuActions(handlers: ShortcutHandlers): void {
           break;
         case 'prevTab':
           tabs.cycle(-1);
+          break;
+        case 'importCollection':
+          void importCollections();
           break;
       }
     });

@@ -6,6 +6,7 @@ import { useTabs } from '../../stores/tabs';
 import { useUi, type Dialog } from '../../stores/ui';
 import { Button, Modal } from '../common/Modal';
 import { EnvironmentsDialog } from './EnvironmentsDialog';
+import { ExportCollectionDialog } from './ExportCollectionDialog';
 
 const NEW = '__new__';
 const fieldClass =
@@ -178,6 +179,8 @@ export function Dialogs() {
       return <ConfirmDialog dialog={dialog} />;
     case 'environments':
       return <EnvironmentsDialog initialId={dialog.selectedId} />;
+    case 'exportCollection':
+      return <ExportCollectionDialog collectionId={dialog.collectionId} />;
   }
 }
 

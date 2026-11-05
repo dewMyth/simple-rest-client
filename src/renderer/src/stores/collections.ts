@@ -7,6 +7,8 @@ interface CollectionsState {
   collections: Collection[];
   load(collections: Collection[]): void;
   create(name: string): Collection;
+  /** Adds imported collections (already given fresh ids) to the end of the list. */
+  importMany(collections: Collection[]): void;
   rename(id: string, name: string): void;
   remove(id: string): void;
   duplicate(id: string): void;
@@ -68,6 +70,14 @@ export const useCollections = create<CollectionsState>((set, get) => {
       persist(c);
       persistOrder(collections);
       return c;
+    },
+
+    importMany(imported) {
+      if (imported.length === 0) return;
+      const collections = [...get().collections, ...imported];
+      set({ collections });
+      imported.forEach(persist);
+      persistOrder(collections);
     },
 
     rename(id, name) {

@@ -56,3 +56,9 @@ export const MoreIcon = (p: SVGProps<SVGSVGElement>) => (
     <path d="M3.5 8h.01M8 8h.01M12.5 8h.01" strokeWidth={2.4} />
   </svg>
 );
+export const ImportIcon = (p: SVGProps<SVGSVGElement>) => (
+  <svg {...base(p)}>
+    <path d="M8 10V2M4.5 6.5L8 10l3.5-3.5" />
+    <path d="M2.5 10.5v2a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-2" />
+  </svg>
+);

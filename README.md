@@ -11,7 +11,7 @@ A fast, local-first REST client for macOS and Windows. There's no account, no sy
 - Responses with status, time, size and headers, plus Pretty and Raw views. Pretty view keeps big integers exact.
 - Search, copy, and save a response to a file
 - Tabs with an unsaved-changes dot
-- Collections, one level deep
+- Collections, one level deep, with import and export as JSON files
 - Environments with `{{variables}}`, highlighted in the editor
 - History of the last 200 requests
 - Paste a cURL command into the URL bar to import it, or copy any request as cURL
@@ -54,6 +54,19 @@ data/
 ```
 
 Files are written atomically, so a crash can't leave one half-written. If a file can't be read, SimpleRest renames it to `<name>.corrupt-<timestamp>.json`, shows a warning, and carries on. It never deletes it. To reset the app, quit it and delete the `data` folder.
+
+### Sharing collections
+
+To share a collection, use **Export…** from its ⋯ menu. This writes one collection to a `.simplerest.json` file.
+
+- Secrets are left out unless you tick **Include secrets** in the export dialog. Secrets are Bearer tokens, Basic passwords, and the values of `Authorization`, `Cookie`, `Proxy-Authorization` and `X-Api-Key` headers.
+- Multipart file paths are never exported. Whoever imports the file picks those files again.
+
+To import, use the import button at the top of the Collections sidebar, or **File → Import Collection…**. You can select several files at once.
+
+- Each imported collection is added as a new collection. If the name is already taken, it becomes `Users API (2)`, so nothing existing is overwritten.
+- A collection file copied straight from the data folder can be imported too.
+- Only SimpleRest files are supported, not Postman or Insomnia.
 
 ### Secrets are stored in plain text
 

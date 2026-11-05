@@ -10,6 +10,9 @@ const api: SimpleRestApi = {
   pickFile: () => ipcRenderer.invoke(IPC.pickFile),
   saveResponse: (tabId) => ipcRenderer.invoke(IPC.saveResponse, tabId),
   copyText: (text) => ipcRenderer.invoke(IPC.copyText, text),
+  exportCollection: (collection, includeSecrets) =>
+    ipcRenderer.invoke(IPC.exportCollection, { collection, includeSecrets }),
+  importCollections: (existingNames) => ipcRenderer.invoke(IPC.importCollections, existingNames),
   loadAll: () => ipcRenderer.invoke(IPC.loadAll),
   saveCollection: (c) => ipcRenderer.invoke(IPC.saveCollection, c),
   deleteCollection: (id) => ipcRenderer.invoke(IPC.deleteCollection, id),
