@@ -9,6 +9,10 @@ import { assertTrustedSender, hardenWebContents, isDev, rendererIndexPath } from
 
 app.setName('SimpleRest');
 
+// Lets end-to-end tests run against an isolated, throwaway data folder.
+const userDataOverride = process.env['SIMPLEREST_USER_DATA'];
+if (userDataOverride) app.setPath('userData', userDataOverride);
+
 function createWindow(): BrowserWindow {
   const win = new BrowserWindow({
     width: 1200,

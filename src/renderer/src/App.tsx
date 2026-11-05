@@ -1,10 +1,10 @@
+import { AppLayout } from './components/layout/AppLayout';
+import { Sidebar } from './components/sidebar/Sidebar';
+import { useMenuActions } from './lib/shortcuts';
+import { useTabs } from './stores/tabs';
+
 export default function App() {
-  return (
-    <div
-      className="flex h-full items-center justify-center bg-bg text-fg-muted"
-      data-testid="app-root"
-    >
-      SimpleRest
-    </div>
-  );
+  const closeTab = (id: string) => useTabs.getState().closeTab(id);
+  useMenuActions({ save: () => {}, closeTab });
+  return <AppLayout sidebar={<Sidebar />} onCloseTab={closeTab} />;
 }

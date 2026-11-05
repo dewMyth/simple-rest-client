@@ -23,3 +23,11 @@ Deviations from `plan.md`, and choices the plan left open.
 - **`ResponseResult` has two extra fields:** `contentType` (for the Pretty view and the save file name) and `undecodedEncoding` (set when the body is shown as raw bytes because its `Content-Encoding` isn't supported).
 - **`SavedRequest.disabledParams` was added now** so the schema doesn't change again in M2.
 - **Test certificate.** `tests/fixtures/certs` holds a self-signed certificate for the local HTTPS test server. It's test-only.
+
+## M2
+
+- **Params table rows live in tab state.** Enabled rows mirror the URL query; disabled rows are kept in `disabledParams`. When the URL is edited, disabled rows keep their position and enabled slots are refilled from the URL. When the table is edited, segments the user didn't touch are copied from the URL text verbatim, so nothing is re-encoded.
+- **Pretty view uses a text-walking formatter.** `JSON.parse` is used only to check validity; the output is built from the original text so number tokens never change. Pretty view is skipped for truncated bodies (they aren't valid JSON).
+- **Shortcuts go through menu accelerators** and are forwarded to the renderer as named actions. `Ctrl+Shift+Tab` (previous tab) was added alongside `Ctrl+Tab`. Pressing `Cmd/Ctrl+Enter` while a request is running cancels it.
+- **`SIMPLEREST_USER_DATA`** overrides the data folder. It exists so end-to-end tests can use a throwaway folder.
+- **`@lezer/highlight`** is imported directly for syntax tags. It's part of CodeMirror 6 and was already installed as a dependency of `@codemirror/language`.
