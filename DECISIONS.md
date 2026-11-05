@@ -65,3 +65,15 @@ Deviations from `plan.md`, and choices the plan left open.
 - **Copy as cURL fills in variables** from the active environment, so the command runs as-is. Any unresolved names are listed in the confirmation.
 - **Multipart text fields export as `--form-string`** so values starting with `@` or `<` aren't read as files by curl.
 - **Vitest config is `vitest.config.mts`** so it loads as ESM without `"type": "module"`.
+
+## M6
+
+- **Installers are built in CI on version tags** (and on manual runs), not on every push. Every push and pull request still runs typecheck, lint, unit, integration and end-to-end tests, plus the app build, on `macos-latest` and `windows-latest`.
+- **Separate x64 and arm64 builds** on both platforms: two `.dmg` files and two NSIS `.exe` files. The NSIS installer is assisted (not one-click), per-user, and never asks for elevation.
+- **Signing comes from environment variables only.** `electron-builder.yml` has no signing settings. CI passes the signing secrets through and turns off certificate auto-discovery when `CSC_LINK` is empty.
+- **Icons** are generated from `build/icon.svg` by `npm run icons`, which renders the SVG with Electron. `.icns` uses macOS `iconutil`, and `.ico` is written as a PNG-based ICO. The generated files are committed so Windows CI doesn't need to run the script.
+- **Measured locally (macOS arm64, unsigned):**
+  - The `.dmg` is 116 MiB.
+  - `app.asar` is 5.5 MB and holds only `out/`, `undici` and `zod`, with no source maps or tests.
+  - Startup to a usable window is about 0.3 s warm, and 1.9 s on the first launch of a freshly built app (which includes macOS's first-run scan).
+- **E2E tests launch the project root**, not `out/main/index.js`, so Electron reads `package.json` the same way a packaged app does. This gives the correct app version in `User-Agent`.

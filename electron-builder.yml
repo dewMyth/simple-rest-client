@@ -1,0 +1,55 @@
+# Rename the app here and in package.json (name, productName).
+appId: dev.simplerest.app
+productName: SimpleRest
+copyright: Copyright © SimpleRest contributors
+
+directories:
+  output: release
+  buildResources: build
+
+# Only the built app and runtime dependencies are packaged.
+files:
+  - out/**/*
+  - package.json
+  - '!**/*.map'
+  - '!**/*.{ts,tsx,mts,cts}'
+  - '!**/{test,tests,__tests__,spec,example,examples,docs}/**'
+  - '!**/*.{md,markdown}'
+  - '!**/{.eslintrc*,.prettierrc*,tsconfig*.json,LICENSE.txt,CHANGELOG*}'
+asar: true
+compression: normal
+
+# Signing is off unless credentials are provided through environment variables:
+#   macOS:   CSC_LINK, CSC_KEY_PASSWORD, and for notarization APPLE_ID,
+#            APPLE_APP_SPECIFIC_PASSWORD, APPLE_TEAM_ID
+#   Windows: WIN_CSC_LINK, WIN_CSC_KEY_PASSWORD
+# Set CSC_IDENTITY_AUTO_DISCOVERY=false to build unsigned on a machine with certificates.
+
+mac:
+  category: public.app-category.developer-tools
+  icon: build/icon.icns
+  hardenedRuntime: true
+  target:
+    - target: dmg
+      arch: [x64, arm64]
+  artifactName: ${productName}-${version}-mac-${arch}.${ext}
+
+dmg:
+  writeUpdateInfo: false
+
+win:
+  icon: build/icon.ico
+  target:
+    - target: nsis
+      arch: [x64, arm64]
+  artifactName: ${productName}-${version}-win-${arch}-setup.${ext}
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowElevation: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  differentialPackage: false
+
+publish: null
