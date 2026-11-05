@@ -33,3 +33,20 @@ export async function sendAndWait(page: Page): Promise<void> {
   await page.getByTestId('send-button').click();
   await page.waitForSelector('[data-testid="response-view"], [data-testid="response-error"]');
 }
+
+/** Triggers a native menu action the way its accelerator would. */
+export async function menuAction(
+  app: import('@playwright/test').ElectronApplication,
+  action: string,
+): Promise<void> {
+  await app.evaluate(({ BrowserWindow }, a) => {
+    BrowserWindow.getAllWindows()[0]?.webContents.send('menu:action', a);
+  }, action);
+}
+
+export async function openApp(dataDir: string) {
+  const app = await launchApp(dataDir);
+  const page = await app.firstWindow();
+  await page.waitForSelector('[data-testid="app-root"]');
+  return { app, page };
+}

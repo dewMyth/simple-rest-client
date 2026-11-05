@@ -1,5 +1,15 @@
 import type { AppInfo, MenuAction, PickedFile, SaveResult } from './ipc';
-import type { SendInput, SendResult } from './types';
+import type {
+  Collection,
+  Environment,
+  HistoryEntry,
+  HttpRequestSpec,
+  LoadedData,
+  SendInput,
+  SendResult,
+  Session,
+  SettingsPatch,
+} from './types';
 
 /** The complete surface the preload exposes to the renderer as `window.api`. */
 export interface SimpleRestApi {
@@ -17,4 +27,19 @@ export interface SimpleRestApi {
   /** Saves the full response body for a tab through a native save dialog. */
   saveResponse(tabId: string): Promise<SaveResult>;
   copyText(text: string): Promise<void>;
+
+  /** Loads everything from the data folder. Corrupt files are set aside and listed in `warnings`. */
+  loadAll(): Promise<LoadedData>;
+  saveCollection(collection: Collection): Promise<void>;
+  deleteCollection(id: string): Promise<void>;
+  saveEnvironment(environment: Environment): Promise<void>;
+  deleteEnvironment(id: string): Promise<void>;
+  updateSettings(patch: SettingsPatch): Promise<void>;
+  saveSession(session: Session): Promise<void>;
+  /** Records a sent request. The main process strips secrets before writing. */
+  addHistory(
+    entry: Omit<HistoryEntry, 'request'> & { request: HttpRequestSpec },
+  ): Promise<HistoryEntry>;
+  deleteHistory(id: string): Promise<void>;
+  clearHistory(): Promise<void>;
 }

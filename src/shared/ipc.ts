@@ -21,6 +21,16 @@ export const IPC = {
   pickFile: 'dialog:pickFile',
   saveResponse: 'dialog:saveResponse',
   copyText: 'clipboard:writeText',
+  loadAll: 'storage:loadAll',
+  saveCollection: 'storage:saveCollection',
+  deleteCollection: 'storage:deleteCollection',
+  saveEnvironment: 'storage:saveEnvironment',
+  deleteEnvironment: 'storage:deleteEnvironment',
+  updateSettings: 'storage:updateSettings',
+  saveSession: 'storage:saveSession',
+  addHistory: 'storage:addHistory',
+  deleteHistory: 'storage:deleteHistory',
+  clearHistory: 'storage:clearHistory',
 } as const;
 
 export interface PickedFile {

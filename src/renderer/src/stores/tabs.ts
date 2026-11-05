@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import type { KeyValue, ResponseResult, SavedRequest, SendError } from '@shared/types';
+import type { KeyValue, ResponseResult, SavedRequest, SendError, SessionTab } from '@shared/types';
+import { stableStringify } from '@shared/stableStringify';
 import { newId } from '../lib/id';
 import { createRequest, toSpec } from '../lib/requests';
 import { applyParamRows, mergeParamRows, paramRowsFor } from '../lib/url';
@@ -33,7 +34,7 @@ export interface Tab {
   responseView: 'pretty' | 'raw';
 }
 
-export const serializeRequest = (r: SavedRequest): string => JSON.stringify(r);
+export const serializeRequest = (r: SavedRequest): string => stableStringify(r);
 
 export function isDirty(tab: Tab): boolean {
   return serializeRequest(tab.request) !== tab.snapshot;
@@ -53,6 +54,29 @@ export function createTab(
     requestSection: 'params',
     responseSection: 'body',
     responseView: 'pretty',
+  };
+}
+
+export function toSessionTab(t: Tab): SessionTab {
+  return {
+    id: t.id,
+    request: t.request,
+    savedRef: t.savedRef,
+    snapshot: t.snapshot,
+    requestSection: t.requestSection,
+    responseSection: t.responseSection,
+    responseView: t.responseView,
+  };
+}
+
+export function fromSessionTab(s: SessionTab): Tab {
+  return {
+    ...createTab(s.request, s.savedRef),
+    id: s.id,
+    snapshot: s.snapshot,
+    requestSection: s.requestSection,
+    responseSection: s.responseSection,
+    responseView: s.responseView,
   };
 }
 
@@ -86,9 +110,17 @@ interface TabsState {
   ): void;
   markSaved(id: string, request: SavedRequest, savedRef: SavedRef): void;
   /** Replaces all tabs (used by session restore). */
-  restore(tabs: Tab[], activeId: string): void;
+  restore(tabs: Tab[], activeId: string | null): void;
+  /** Keeps tabs in step when a saved request is renamed, moved or deleted. */
+  renameSaved(ref: SavedRef, name: string): void;
+  moveSaved(from: SavedRef, to: SavedRef): void;
+  detachSaved(match: (ref: SavedRef) => boolean): void;
   send(id: string): Promise<void>;
   cancel(id: string): void;
+}
+
+function sameRef(a: SavedRef | null, b: SavedRef): boolean {
+  return !!a && a.collectionId === b.collectionId && a.requestId === b.requestId;
 }
 
 const first = createTab();
@@ -194,7 +226,36 @@ export const useTabs = create<TabsState>((set, get) => {
 
     restore(tabs, activeId) {
       if (tabs.length === 0) return;
-      set({ tabs, activeId: tabs.some((t) => t.id === activeId) ? activeId : tabs[0]!.id });
+      set({ tabs, activeId: tabs.find((t) => t.id === activeId)?.id ?? tabs[0]!.id });
+    },
+
+    renameSaved(ref, name) {
+      set((s) => ({
+        tabs: s.tabs.map((t) => {
+          if (!sameRef(t.savedRef, ref)) return t;
+          let snapshot = t.snapshot;
+          try {
+            snapshot = serializeRequest({ ...(JSON.parse(t.snapshot) as SavedRequest), name });
+          } catch {
+            // keep the old snapshot
+          }
+          return { ...t, request: { ...t.request, name }, snapshot };
+        }),
+      }));
+    },
+
+    moveSaved(from, to) {
+      set((s) => ({
+        tabs: s.tabs.map((t) => (sameRef(t.savedRef, from) ? { ...t, savedRef: to } : t)),
+      }));
+    },
+
+    detachSaved(match) {
+      set((s) => ({
+        tabs: s.tabs.map((t) =>
+          t.savedRef && match(t.savedRef) ? { ...t, savedRef: null, snapshot: '' } : t,
+        ),
+      }));
     },
 
     async send(id) {

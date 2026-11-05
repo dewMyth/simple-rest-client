@@ -127,3 +127,60 @@ export const DEFAULT_OPTIONS: RequestOptions = {
   followRedirects: true,
   verifyTls: true,
 };
+
+export interface HistoryEntry {
+  id: string;
+  sentAt: number;
+  /** Request as sent, with auth values and secret headers removed. */
+  request: HttpRequestSpec;
+  status: number | null;
+  durationMs: number | null;
+  error: string | null;
+}
+
+export interface WindowBounds {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  maximized: boolean;
+}
+
+export interface Settings {
+  schemaVersion: 1;
+  theme: 'system' | 'light' | 'dark';
+  activeEnvironmentId: string | null;
+  windowBounds: WindowBounds | null;
+  layout: { sidebarWidth?: number; requestFraction?: number };
+  defaultOptions: RequestOptions;
+  collectionOrder: string[];
+  environmentOrder: string[];
+}
+
+export type SettingsPatch = Partial<Omit<Settings, 'schemaVersion' | 'windowBounds'>>;
+
+export interface SessionTab {
+  id: string;
+  request: SavedRequest;
+  savedRef: { collectionId: string; requestId: string } | null;
+  snapshot: string;
+  requestSection: 'params' | 'headers' | 'body' | 'auth' | 'options';
+  responseSection: 'body' | 'headers';
+  responseView: 'pretty' | 'raw';
+}
+
+export interface Session {
+  schemaVersion: 1;
+  activeTabId: string | null;
+  tabs: SessionTab[];
+}
+
+export interface LoadedData {
+  collections: Collection[];
+  environments: Environment[];
+  settings: Settings;
+  session: Session | null;
+  history: HistoryEntry[];
+  /** Non-blocking problems found while loading, e.g. corrupt files that were set aside. */
+  warnings: string[];
+}

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { HTTP_METHODS } from './types';
 
-const id = z.string().min(1).max(200);
+const id = z.string().regex(/^[A-Za-z0-9_-]{1,100}$/, 'Invalid id');
 
 export const keyValueSchema = z.object({
   id,
@@ -90,3 +90,63 @@ export const sendInputSchema = z.object({
 });
 
 export const idSchema = id;
+
+export const SCHEMA_VERSION = 1 as const;
+
+export const historyEntrySchema = z.object({
+  id,
+  sentAt: z.number(),
+  request: httpRequestSpecSchema,
+  status: z.number().nullable(),
+  durationMs: z.number().nullable(),
+  error: z.string().nullable(),
+});
+
+export const historyFileSchema = z.object({
+  schemaVersion: z.literal(1),
+  entries: z.array(historyEntrySchema),
+});
+
+const boundsSchema = z.object({
+  x: z.number(),
+  y: z.number(),
+  width: z.number().min(200),
+  height: z.number().min(200),
+  maximized: z.boolean().default(false),
+});
+
+export const settingsSchema = z.object({
+  schemaVersion: z.literal(1),
+  theme: z.enum(['system', 'light', 'dark']).default('system'),
+  activeEnvironmentId: z.string().nullable().default(null),
+  windowBounds: boundsSchema.nullable().default(null),
+  layout: z.object({ sidebarWidth: z.number(), requestFraction: z.number() }).partial().default({}),
+  defaultOptions: requestOptionsSchema.default({
+    timeoutMs: 30000,
+    followRedirects: true,
+    verifyTls: true,
+  }),
+  collectionOrder: z.array(z.string()).default([]),
+  environmentOrder: z.array(z.string()).default([]),
+});
+
+export const settingsPatchSchema = settingsSchema
+  .omit({ schemaVersion: true, windowBounds: true })
+  .partial();
+
+export const sessionTabSchema = z.object({
+  id,
+  request: savedRequestSchema,
+  savedRef: z.object({ collectionId: id, requestId: id }).nullable(),
+  /** Stable serialization of the request when it was last saved. */
+  snapshot: z.string(),
+  requestSection: z.enum(['params', 'headers', 'body', 'auth', 'options']).default('params'),
+  responseSection: z.enum(['body', 'headers']).default('body'),
+  responseView: z.enum(['pretty', 'raw']).default('pretty'),
+});
+
+export const sessionSchema = z.object({
+  schemaVersion: z.literal(1),
+  activeTabId: z.string().nullable(),
+  tabs: z.array(sessionTabSchema),
+});

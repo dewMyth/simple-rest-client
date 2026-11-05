@@ -31,3 +31,15 @@ Deviations from `plan.md`, and choices the plan left open.
 - **Shortcuts go through menu accelerators** and are forwarded to the renderer as named actions. `Ctrl+Shift+Tab` (previous tab) was added alongside `Ctrl+Tab`. Pressing `Cmd/Ctrl+Enter` while a request is running cancels it.
 - **`SIMPLEREST_USER_DATA`** overrides the data folder. It exists so end-to-end tests can use a throwaway folder.
 - **`@lezer/highlight`** is imported directly for syntax tags. It's part of CodeMirror 6 and was already installed as a dependency of `@codemirror/language`.
+
+## M3
+
+- **IDs must match `[A-Za-z0-9_-]{1,100}`.** File names come from IDs, so the zod schema and the storage layer both reject anything else.
+- **Unknown schema versions count as corrupt.** A file from a newer version of the app is set aside as `<name>.corrupt-<timestamp>.json` with a warning, so it's never overwritten. Same for invalid JSON or unexpected content.
+- **Startup load is reused once.** The main process loads data before creating the window (for window bounds and theme). The renderer's first `loadAll` gets that same result, so warnings about files that were just set aside aren't lost.
+- **Collection order lives in `settings.json`** (`collectionOrder`), since each collection is its own file. Request order is the array order inside the collection.
+- **Deleting a collection deletes its file**, after a confirmation dialog. Open tabs from it become unsaved drafts.
+- **Saved multipart file paths.** Paths read from the app's own collections and session are approved for upload. When the renderer saves a collection or session, any file path the main process never approved is cleared, so the renderer can't introduce new paths through storage.
+- **Dirty checks use a stable (sorted-key) serialization** so key order never causes a false "unsaved" dot. The snapshot is stored in `session.json` so the indicator survives a restart.
+- **`settings.json` has a `theme` field** (`system` by default, which follows the OS). There's no UI for it; v1 always follows the OS unless the file is edited.
+- **Window bounds are saved** (debounced) and restored only if they still fit on a connected display.

@@ -1,4 +1,5 @@
-import { DEFAULT_OPTIONS, type HttpRequestSpec, type SavedRequest } from '@shared/types';
+import type { HttpRequestSpec, SavedRequest } from '@shared/types';
+import { useSettings } from '../stores/settings';
 import { newId } from './id';
 
 export function createRequest(overrides: Partial<SavedRequest> = {}): SavedRequest {
@@ -11,7 +12,7 @@ export function createRequest(overrides: Partial<SavedRequest> = {}): SavedReque
     headers: [],
     body: { type: 'none' },
     auth: { type: 'none' },
-    options: { ...DEFAULT_OPTIONS },
+    options: { ...useSettings.getState().defaultOptions },
     ...overrides,
   };
 }

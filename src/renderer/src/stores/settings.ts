@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { DEFAULT_OPTIONS, type RequestOptions } from '@shared/types';
 
 export interface LayoutSettings {
   sidebarWidth: number;
@@ -7,6 +8,8 @@ export interface LayoutSettings {
 }
 
 interface SettingsState extends LayoutSettings {
+  defaultOptions: RequestOptions;
+  setDefaultOptions(o: RequestOptions): void;
   setSidebarWidth(px: number): void;
   setRequestFraction(f: number): void;
   load(layout: Partial<LayoutSettings>): void;
@@ -16,6 +19,8 @@ export const clamp = (v: number, min: number, max: number): number =>
   Math.min(max, Math.max(min, v));
 
 export const useSettings = create<SettingsState>((set) => ({
+  defaultOptions: { ...DEFAULT_OPTIONS },
+  setDefaultOptions: (defaultOptions) => set({ defaultOptions }),
   sidebarWidth: 260,
   requestFraction: 0.45,
   setSidebarWidth: (px) => set({ sidebarWidth: clamp(Math.round(px), 180, 600) }),
