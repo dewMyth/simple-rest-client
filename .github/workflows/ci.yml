@@ -3,13 +3,23 @@ name: CI
 on:
   push:
     branches: [main]
-    tags: ['v*']
+    # Release tags, with or without a leading "v": 0.1.0, v0.1.0, 1.2.0-beta.1
+    tags: ['v[0-9]+.[0-9]+.[0-9]+*', '[0-9]+.[0-9]+.[0-9]+*']
   pull_request:
   workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing release tag to build installers for (e.g. 0.1.0). Leave empty to only run tests.'
+        required: false
+        default: ''
+
+env:
+  # The tag being released, from a tag push or the manual input. Empty for normal CI runs.
+  RELEASE_TAG: ${{ github.ref_type == 'tag' && github.ref_name || inputs.tag }}
 
 jobs:
-  test-and-build:
-    name: ${{ matrix.os }}
+  test:
+    name: test (${{ matrix.os }})
     strategy:
       fail-fast: false
       matrix:
@@ -17,6 +27,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
 
       - uses: actions/setup-node@v4
         with:
@@ -31,8 +43,39 @@ jobs:
       - name: End-to-end tests
         run: npx playwright test
 
+  installers:
+    name: installers (${{ matrix.os }})
+    needs: test
+    if: github.ref_type == 'tag' || inputs.tag != ''
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Check the tag matches package.json
+        shell: bash
+        run: |
+          version=$(node -p "require('./package.json').version")
+          if [ "${RELEASE_TAG#v}" != "$version" ]; then
+            echo "::error::Tag $RELEASE_TAG doesn't match package.json version $version. Update package.json, commit, and tag again."
+            exit 1
+          fi
+
+      - run: npm run build
+
       - name: Build installers
-        if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
         shell: bash
         run: |
           if [ "$RUNNER_OS" = "macOS" ]; then
@@ -52,16 +95,38 @@ jobs:
           WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
 
       - name: Report installer sizes
-        if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
         shell: bash
         run: ls -l release/*.dmg release/*.exe 2>/dev/null || true
 
-      - name: Upload installers
-        if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: installers-${{ matrix.os }}
           path: |
             release/*.dmg
             release/*.exe
           if-no-files-found: error
+
+  release:
+    name: attach to release
+    needs: installers
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: installers-*
+          path: dist
+          merge-multiple: true
+
+      - run: ls -l dist
+
+      # Adds the installers to the GitHub Release for this tag, creating the release if needed.
+      # An existing release keeps its title and notes.
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.RELEASE_TAG }}
+          files: |
+            dist/*.dmg
+            dist/*.exe
+          fail_on_unmatched_files: true

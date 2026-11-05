@@ -20,7 +20,7 @@ A fast, local-first REST client for macOS and Windows. There's no account, no sy
 
 ## Install
 
-Download the installer for your system from the latest release build. Installers are attached as workflow artifacts on version tags.
+Download the installer for your system from the [Releases](https://github.com/dewMyth/simple-rest-client/releases) page.
 
 - **macOS:** open `SimpleRest-<version>-mac-arm64.dmg` (Apple silicon) or `-mac-x64.dmg` (Intel) and drag SimpleRest to Applications. The app isn't signed yet, so on first launch macOS blocks it. Open **System Settings → Privacy & Security** and choose **Open Anyway**.
 - **Windows:** run `SimpleRest-<version>-win-x64-setup.exe` (or `-arm64-`). It installs for your user only and doesn't need admin rights. SmartScreen warns about unsigned installers; choose **More info → Run anyway**.
@@ -98,6 +98,14 @@ tests/          unit, integration (with a local HTTP/HTTPS test server) and e2e 
 ```
 
 All network and file access happens in the main process. The renderer runs sandboxed with context isolation, a strict Content Security Policy, and no Node access. Every IPC message is validated with zod and must come from the app's own frame.
+
+## Releasing
+
+1. Set `version` in `package.json` (for example `0.2.0`) and commit.
+2. Create a GitHub release with a matching tag: `0.2.0` or `v0.2.0`. You can also just push the tag.
+3. CI runs the tests on macOS and Windows, builds the `.dmg` and `.exe` installers, and attaches them to the release.
+
+If a release was created before its installers could be built, open **Actions → CI → Run workflow** and enter the tag. The installers will be built from that tag and added to its release.
 
 ## Code signing
 
