@@ -94,7 +94,7 @@ export function HistoryList() {
                     ev.stopPropagation();
                     useHistory.getState().remove(e.id);
                   }}
-                  className="hidden text-fg-faint group-hover:block hover:text-fg"
+                  className="text-fg-faint opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 hover:text-fg focus-visible:opacity-100"
                 >
                   ✕
                 </button>

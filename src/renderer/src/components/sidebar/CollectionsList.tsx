@@ -133,10 +133,10 @@ function CollectionItem({
             {c.name}
           </span>
         )}
-        <span className="text-[11px] text-fg-faint group-hover:hidden">
+        <span className="text-[11px] text-fg-faint group-focus-within:hidden group-hover:hidden">
           {c.requests.length || ''}
         </span>
-        <span className="hidden group-hover:block has-[[aria-expanded=true]]:block">
+        <span className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 has-[[aria-expanded=true]]:opacity-100">
           <Menu
             label={`Actions for ${c.name}`}
             testId="collection-menu"
@@ -237,7 +237,7 @@ function RequestItem({ collectionId, requestId }: { collectionId: string; reques
       ) : (
         <span className="flex-1 truncate">{requestTitle(r)}</span>
       )}
-      <span className="hidden group-hover:block has-[[aria-expanded=true]]:block">
+      <span className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 has-[[aria-expanded=true]]:opacity-100">
         <Menu
           label={`Actions for ${requestTitle(r)}`}
           testId="request-menu"
