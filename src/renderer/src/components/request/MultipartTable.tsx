@@ -1,6 +1,7 @@
 import type { MultipartField } from '@shared/types';
 import { newId } from '../../lib/id';
 import { inputClass } from '../common/kv';
+import { useFocusNewRow } from '../common/useFocusNewRow';
 import { XIcon } from '../common/icons';
 
 function fileName(path: string): string {
@@ -26,8 +27,10 @@ export function MultipartTable(props: {
       });
   };
 
+  const { container, focusAfterAdd } = useFocusNewRow<HTMLDivElement>();
+
   return (
-    <div role="table" aria-label="Multipart fields" className="px-2 py-1">
+    <div ref={container} role="table" aria-label="Multipart fields" className="px-2 py-1">
       {fields.map((f) => (
         <div
           key={f.id}
@@ -46,6 +49,8 @@ export function MultipartTable(props: {
             value={f.key}
             placeholder="Key"
             aria-label="Key"
+            data-row-id={f.id}
+            data-field="key"
             onChange={(e) => update(f.id, { ...f, key: e.target.value })}
           />
           <select
@@ -101,12 +106,15 @@ export function MultipartTable(props: {
           value=""
           placeholder="Key"
           aria-label="New key"
-          onChange={(e) =>
+          onChange={(e) => {
+            // Focus follows the new field so the next letter isn't typed into another new row.
+            const id = newId();
+            focusAfterAdd(id, 'key');
             onChange([
               ...fields,
-              { id: newId(), kind: 'text', key: e.target.value, value: '', enabled: true },
-            ])
-          }
+              { id, kind: 'text', key: e.target.value, value: '', enabled: true },
+            ]);
+          }}
         />
         <button
           onClick={() =>
